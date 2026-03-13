@@ -1,0 +1,727 @@
+{
+  "metadata": {
+    "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v9/manifest.json",
+    "dbt_version": "1.7.0",
+    "generated_at": "2024-01-15T10:00:00.000000Z",
+    "invocation_id": "abc123",
+    "env": {},
+    "project_name": "fintech",
+    "adapter_type": "bigquery"
+  },
+  "nodes": {
+    "model.fintech.stg_orders": {
+      "unique_id": "model.fintech.stg_orders",
+      "name": "stg_orders",
+      "resource_type": "model",
+      "path": "staging/stg_orders.sql",
+      "original_file_path": "models/staging/stg_orders.sql",
+      "compiled_code": "SELECT\n  order_id,\n  customer_id,\n  product_id,\n  order_date,\n  status,\n  amount,\n  currency,\n  created_at,\n  updated_at\nFROM `fintech`.`raw`.`orders`\nWHERE status IS NOT NULL",
+      "raw_code": "SELECT\n  order_id,\n  customer_id,\n  product_id,\n  order_date,\n  status,\n  amount,\n  currency,\n  created_at,\n  updated_at\nFROM {{ source('fintech', 'raw_orders') }}\nWHERE status IS NOT NULL",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["source.fintech.fintech.raw_orders"]
+      },
+      "refs": [],
+      "sources": [["fintech", "raw_orders"]],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Unique identifier for each order", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Foreign key to customers", "data_type": "STRING"},
+        "product_id": {"name": "product_id", "description": "Foreign key to products", "data_type": "STRING"},
+        "order_date": {"name": "order_date", "description": "Date the order was placed", "data_type": "DATE"},
+        "status": {"name": "status", "description": "Current order status", "data_type": "STRING"},
+        "amount": {"name": "amount", "description": "Order amount in local currency", "data_type": "NUMERIC"},
+        "currency": {"name": "currency", "description": "ISO currency code", "data_type": "STRING"}
+      },
+      "description": "Staged orders from raw source with basic cleaning and standardization",
+      "tags": ["staging", "orders"],
+      "config": {"materialized": "view", "schema": "staging"},
+      "fqn": ["fintech", "staging", "stg_orders"],
+      "database": "fintech",
+      "schema": "staging"
+    },
+    "model.fintech.stg_customers": {
+      "unique_id": "model.fintech.stg_customers",
+      "name": "stg_customers",
+      "resource_type": "model",
+      "path": "staging/stg_customers.sql",
+      "original_file_path": "models/staging/stg_customers.sql",
+      "compiled_code": "SELECT\n  customer_id,\n  email,\n  first_name,\n  last_name,\n  phone,\n  country,\n  signup_date,\n  is_active,\n  created_at\nFROM `fintech`.`raw`.`customers`\nWHERE email IS NOT NULL",
+      "raw_code": "SELECT\n  customer_id,\n  email,\n  first_name,\n  last_name,\n  phone,\n  country,\n  signup_date,\n  is_active,\n  created_at\nFROM {{ source('fintech', 'raw_customers') }}\nWHERE email IS NOT NULL",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["source.fintech.fintech.raw_customers"]
+      },
+      "refs": [],
+      "sources": [["fintech", "raw_customers"]],
+      "columns": {
+        "customer_id": {"name": "customer_id", "description": "Unique customer identifier", "data_type": "STRING"},
+        "email": {"name": "email", "description": "Customer email address", "data_type": "STRING"},
+        "first_name": {"name": "first_name", "description": "Customer first name", "data_type": "STRING"},
+        "last_name": {"name": "last_name", "description": "Customer last name", "data_type": "STRING"},
+        "country": {"name": "country", "description": "Customer country code", "data_type": "STRING"},
+        "signup_date": {"name": "signup_date", "description": "Date customer signed up", "data_type": "DATE"},
+        "is_active": {"name": "is_active", "description": "Whether the customer is active", "data_type": "BOOLEAN"}
+      },
+      "description": "Staged customers from raw source with email validation and standardization",
+      "tags": ["staging", "customers"],
+      "config": {"materialized": "view", "schema": "staging"},
+      "fqn": ["fintech", "staging", "stg_customers"],
+      "database": "fintech",
+      "schema": "staging"
+    },
+    "model.fintech.stg_payments": {
+      "unique_id": "model.fintech.stg_payments",
+      "name": "stg_payments",
+      "resource_type": "model",
+      "path": "staging/stg_payments.sql",
+      "original_file_path": "models/staging/stg_payments.sql",
+      "compiled_code": "SELECT\n  payment_id,\n  order_id,\n  customer_id,\n  payment_method,\n  payment_status,\n  amount,\n  currency,\n  payment_date,\n  gateway_response\nFROM `fintech`.`raw`.`payments`",
+      "raw_code": "SELECT\n  payment_id,\n  order_id,\n  customer_id,\n  payment_method,\n  payment_status,\n  amount,\n  currency,\n  payment_date,\n  gateway_response\nFROM {{ source('fintech', 'raw_payments') }}",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["source.fintech.fintech.raw_payments"]
+      },
+      "refs": [],
+      "sources": [["fintech", "raw_payments"]],
+      "columns": {
+        "payment_id": {"name": "payment_id", "description": "Unique payment identifier", "data_type": "STRING"},
+        "order_id": {"name": "order_id", "description": "Foreign key to orders", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Foreign key to customers", "data_type": "STRING"},
+        "payment_method": {"name": "payment_method", "description": "Payment method used", "data_type": "STRING"},
+        "payment_status": {"name": "payment_status", "description": "Status of the payment", "data_type": "STRING"},
+        "amount": {"name": "amount", "description": "Payment amount", "data_type": "NUMERIC"},
+        "currency": {"name": "currency", "description": "ISO currency code", "data_type": "STRING"}
+      },
+      "description": "Staged payments from raw source",
+      "tags": ["staging", "payments"],
+      "config": {"materialized": "view", "schema": "staging"},
+      "fqn": ["fintech", "staging", "stg_payments"],
+      "database": "fintech",
+      "schema": "staging"
+    },
+    "model.fintech.stg_products": {
+      "unique_id": "model.fintech.stg_products",
+      "name": "stg_products",
+      "resource_type": "model",
+      "path": "staging/stg_products.sql",
+      "original_file_path": "models/staging/stg_products.sql",
+      "compiled_code": "SELECT\n  product_id,\n  product_name,\n  category,\n  price,\n  currency,\n  is_active,\n  created_at\nFROM `fintech`.`raw`.`products`\nWHERE is_active = TRUE",
+      "raw_code": "SELECT\n  product_id,\n  product_name,\n  category,\n  price,\n  currency,\n  is_active,\n  created_at\nFROM {{ source('fintech', 'raw_products') }}\nWHERE is_active = TRUE",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["source.fintech.fintech.raw_products"]
+      },
+      "refs": [],
+      "sources": [["fintech", "raw_products"]],
+      "columns": {
+        "product_id": {"name": "product_id", "description": "Unique product identifier", "data_type": "STRING"},
+        "product_name": {"name": "product_name", "description": "Name of the product", "data_type": "STRING"},
+        "category": {"name": "category", "description": "Product category", "data_type": "STRING"},
+        "price": {"name": "price", "description": "Product price", "data_type": "NUMERIC"},
+        "currency": {"name": "currency", "description": "ISO currency code", "data_type": "STRING"},
+        "is_active": {"name": "is_active", "description": "Whether the product is active", "data_type": "BOOLEAN"}
+      },
+      "description": "Staged products from raw source with active filter",
+      "tags": ["staging", "products"],
+      "config": {"materialized": "view", "schema": "staging"},
+      "fqn": ["fintech", "staging", "stg_products"],
+      "database": "fintech",
+      "schema": "staging"
+    },
+    "model.fintech.stg_events": {
+      "unique_id": "model.fintech.stg_events",
+      "name": "stg_events",
+      "resource_type": "model",
+      "path": "staging/stg_events.sql",
+      "original_file_path": "models/staging/stg_events.sql",
+      "compiled_code": "SELECT\n  event_id,\n  customer_id,\n  event_type,\n  event_date,\n  session_id,\n  properties,\n  created_at\nFROM `fintech`.`raw`.`events`",
+      "raw_code": "SELECT\n  event_id,\n  customer_id,\n  event_type,\n  event_date,\n  session_id,\n  properties,\n  created_at\nFROM {{ source('fintech', 'raw_events') }}",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["source.fintech.fintech.raw_events"]
+      },
+      "refs": [],
+      "sources": [["fintech", "raw_events"]],
+      "columns": {
+        "event_id": {"name": "event_id", "description": "Unique event identifier", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Foreign key to customers", "data_type": "STRING"},
+        "event_type": {"name": "event_type", "description": "Type of event", "data_type": "STRING"},
+        "event_date": {"name": "event_date", "description": "Date of the event", "data_type": "TIMESTAMP"},
+        "session_id": {"name": "session_id", "description": "Session identifier", "data_type": "STRING"}
+      },
+      "description": "Staged user events from raw source",
+      "tags": ["staging", "events"],
+      "config": {"materialized": "view", "schema": "staging"},
+      "fqn": ["fintech", "staging", "stg_events"],
+      "database": "fintech",
+      "schema": "staging"
+    },
+    "model.fintech.int_orders_enriched": {
+      "unique_id": "model.fintech.int_orders_enriched",
+      "name": "int_orders_enriched",
+      "resource_type": "model",
+      "path": "intermediate/int_orders_enriched.sql",
+      "original_file_path": "models/intermediate/int_orders_enriched.sql",
+      "compiled_code": "SELECT\n  o.order_id,\n  o.customer_id,\n  o.product_id,\n  o.order_date,\n  o.status,\n  o.amount,\n  o.currency,\n  c.email AS customer_email,\n  c.country AS customer_country,\n  p.product_name,\n  p.category AS product_category,\n  p.price AS unit_price\nFROM `fintech`.`staging`.`stg_orders` o\nLEFT JOIN `fintech`.`staging`.`stg_customers` c ON o.customer_id = c.customer_id\nLEFT JOIN `fintech`.`staging`.`stg_products` p ON o.product_id = p.product_id",
+      "raw_code": "SELECT\n  o.order_id,\n  o.customer_id,\n  o.product_id,\n  o.order_date,\n  o.status,\n  o.amount,\n  o.currency,\n  c.email AS customer_email,\n  c.country AS customer_country,\n  p.product_name,\n  p.category AS product_category,\n  p.price AS unit_price\nFROM {{ ref('stg_orders') }} o\nLEFT JOIN {{ ref('stg_customers') }} c ON o.customer_id = c.customer_id\nLEFT JOIN {{ ref('stg_products') }} p ON o.product_id = p.product_id",
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.stg_orders",
+          "model.fintech.stg_customers",
+          "model.fintech.stg_products"
+        ]
+      },
+      "refs": [{"name": "stg_orders"}, {"name": "stg_customers"}, {"name": "stg_products"}],
+      "sources": [],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Unique order identifier", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Customer identifier", "data_type": "STRING"},
+        "product_id": {"name": "product_id", "description": "Product identifier", "data_type": "STRING"},
+        "order_date": {"name": "order_date", "description": "Date of the order", "data_type": "DATE"},
+        "status": {"name": "status", "description": "Order status", "data_type": "STRING"},
+        "amount": {"name": "amount", "description": "Order amount", "data_type": "NUMERIC"},
+        "customer_email": {"name": "customer_email", "description": "Customer email", "data_type": "STRING"},
+        "customer_country": {"name": "customer_country", "description": "Customer country", "data_type": "STRING"},
+        "product_name": {"name": "product_name", "description": "Product name", "data_type": "STRING"},
+        "product_category": {"name": "product_category", "description": "Product category", "data_type": "STRING"}
+      },
+      "description": "Orders enriched with customer and product information for downstream analytics",
+      "tags": ["intermediate", "orders"],
+      "config": {"materialized": "ephemeral"},
+      "fqn": ["fintech", "intermediate", "int_orders_enriched"],
+      "database": "fintech",
+      "schema": "intermediate"
+    },
+    "model.fintech.int_customer_lifetime_value": {
+      "unique_id": "model.fintech.int_customer_lifetime_value",
+      "name": "int_customer_lifetime_value",
+      "resource_type": "model",
+      "path": "intermediate/int_customer_lifetime_value.sql",
+      "original_file_path": "models/intermediate/int_customer_lifetime_value.sql",
+      "compiled_code": "SELECT\n  c.customer_id,\n  c.email,\n  c.first_name,\n  c.last_name,\n  c.country,\n  c.signup_date,\n  COUNT(DISTINCT o.order_id) AS total_orders,\n  SUM(o.amount) AS total_revenue,\n  AVG(o.amount) AS avg_order_value,\n  MIN(o.order_date) AS first_order_date,\n  MAX(o.order_date) AS last_order_date,\n  DATE_DIFF(MAX(o.order_date), MIN(o.order_date), DAY) AS customer_lifespan_days\nFROM `fintech`.`staging`.`stg_customers` c\nLEFT JOIN `fintech`.`staging`.`stg_orders` o ON c.customer_id = o.customer_id\nWHERE o.status = 'completed'\nGROUP BY 1,2,3,4,5,6",
+      "raw_code": "SELECT\n  c.customer_id,\n  c.email,\n  c.first_name,\n  c.last_name,\n  c.country,\n  c.signup_date,\n  COUNT(DISTINCT o.order_id) AS total_orders,\n  SUM(o.amount) AS total_revenue,\n  AVG(o.amount) AS avg_order_value,\n  MIN(o.order_date) AS first_order_date,\n  MAX(o.order_date) AS last_order_date,\n  DATE_DIFF(MAX(o.order_date), MIN(o.order_date), DAY) AS customer_lifespan_days\nFROM {{ ref('stg_customers') }} c\nLEFT JOIN {{ ref('stg_orders') }} o ON c.customer_id = o.customer_id\nWHERE o.status = 'completed'\nGROUP BY 1,2,3,4,5,6",
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.stg_customers",
+          "model.fintech.stg_orders"
+        ]
+      },
+      "refs": [{"name": "stg_customers"}, {"name": "stg_orders"}],
+      "sources": [],
+      "columns": {
+        "customer_id": {"name": "customer_id", "description": "Unique customer identifier", "data_type": "STRING"},
+        "email": {"name": "email", "description": "Customer email", "data_type": "STRING"},
+        "total_orders": {"name": "total_orders", "description": "Total number of completed orders", "data_type": "INTEGER"},
+        "total_revenue": {"name": "total_revenue", "description": "Total revenue from customer", "data_type": "NUMERIC"},
+        "avg_order_value": {"name": "avg_order_value", "description": "Average order value", "data_type": "NUMERIC"},
+        "first_order_date": {"name": "first_order_date", "description": "Date of first order", "data_type": "DATE"},
+        "last_order_date": {"name": "last_order_date", "description": "Date of most recent order", "data_type": "DATE"},
+        "customer_lifespan_days": {"name": "customer_lifespan_days", "description": "Days between first and last order", "data_type": "INTEGER"}
+      },
+      "description": "Customer lifetime value metrics aggregated from orders history",
+      "tags": ["intermediate", "customers", "ltv"],
+      "config": {"materialized": "table"},
+      "fqn": ["fintech", "intermediate", "int_customer_lifetime_value"],
+      "database": "fintech",
+      "schema": "intermediate"
+    },
+    "model.fintech.int_payment_summary": {
+      "unique_id": "model.fintech.int_payment_summary",
+      "name": "int_payment_summary",
+      "resource_type": "model",
+      "path": "intermediate/int_payment_summary.sql",
+      "original_file_path": "models/intermediate/int_payment_summary.sql",
+      "compiled_code": "SELECT\n  p.order_id,\n  p.customer_id,\n  COUNT(DISTINCT p.payment_id) AS payment_attempts,\n  SUM(CASE WHEN p.payment_status = 'success' THEN p.amount ELSE 0 END) AS paid_amount,\n  SUM(CASE WHEN p.payment_status = 'failed' THEN 1 ELSE 0 END) AS failed_attempts,\n  MAX(CASE WHEN p.payment_status = 'success' THEN p.payment_date END) AS successful_payment_date,\n  ARRAY_AGG(DISTINCT p.payment_method) AS payment_methods_used\nFROM `fintech`.`staging`.`stg_payments` p\nGROUP BY 1,2",
+      "raw_code": "SELECT\n  p.order_id,\n  p.customer_id,\n  COUNT(DISTINCT p.payment_id) AS payment_attempts,\n  SUM(CASE WHEN p.payment_status = 'success' THEN p.amount ELSE 0 END) AS paid_amount,\n  SUM(CASE WHEN p.payment_status = 'failed' THEN 1 ELSE 0 END) AS failed_attempts,\n  MAX(CASE WHEN p.payment_status = 'success' THEN p.payment_date END) AS successful_payment_date,\n  ARRAY_AGG(DISTINCT p.payment_method) AS payment_methods_used\nFROM {{ ref('stg_payments') }} p\nGROUP BY 1,2",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.stg_payments"]
+      },
+      "refs": [{"name": "stg_payments"}],
+      "sources": [],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Order identifier", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Customer identifier", "data_type": "STRING"},
+        "payment_attempts": {"name": "payment_attempts", "description": "Total payment attempts", "data_type": "INTEGER"},
+        "paid_amount": {"name": "paid_amount", "description": "Successfully paid amount", "data_type": "NUMERIC"},
+        "failed_attempts": {"name": "failed_attempts", "description": "Number of failed payment attempts", "data_type": "INTEGER"},
+        "successful_payment_date": {"name": "successful_payment_date", "description": "Date of successful payment", "data_type": "DATE"}
+      },
+      "description": "Payment summary per order with success/failure breakdown",
+      "tags": ["intermediate", "payments"],
+      "config": {"materialized": "view"},
+      "fqn": ["fintech", "intermediate", "int_payment_summary"],
+      "database": "fintech",
+      "schema": "intermediate"
+    },
+    "model.fintech.fct_orders": {
+      "unique_id": "model.fintech.fct_orders",
+      "name": "fct_orders",
+      "resource_type": "model",
+      "path": "marts/fct_orders.sql",
+      "original_file_path": "models/marts/fct_orders.sql",
+      "compiled_code": "SELECT\n  o.order_id,\n  o.customer_id,\n  o.product_id,\n  o.order_date,\n  o.status,\n  o.amount AS order_amount,\n  o.currency,\n  o.customer_email,\n  o.customer_country,\n  o.product_name,\n  o.product_category,\n  p.paid_amount,\n  p.payment_attempts,\n  p.failed_attempts,\n  p.successful_payment_date,\n  CASE\n    WHEN o.amount >= 1000 THEN 'high_value'\n    WHEN o.amount >= 100 THEN 'medium_value'\n    ELSE 'low_value'\n  END AS order_tier\nFROM `fintech`.`intermediate`.`int_orders_enriched` o\nLEFT JOIN `fintech`.`intermediate`.`int_payment_summary` p ON o.order_id = p.order_id",
+      "raw_code": "SELECT\n  o.order_id,\n  o.customer_id,\n  o.product_id,\n  o.order_date,\n  o.status,\n  o.amount AS order_amount,\n  o.currency,\n  o.customer_email,\n  o.customer_country,\n  o.product_name,\n  o.product_category,\n  p.paid_amount,\n  p.payment_attempts,\n  p.failed_attempts,\n  p.successful_payment_date,\n  CASE\n    WHEN o.amount >= 1000 THEN 'high_value'\n    WHEN o.amount >= 100 THEN 'medium_value'\n    ELSE 'low_value'\n  END AS order_tier\nFROM {{ ref('int_orders_enriched') }} o\nLEFT JOIN {{ ref('int_payment_summary') }} p ON o.order_id = p.order_id",
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.int_orders_enriched",
+          "model.fintech.int_payment_summary"
+        ]
+      },
+      "refs": [{"name": "int_orders_enriched"}, {"name": "int_payment_summary"}],
+      "sources": [],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Unique order identifier", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Customer identifier", "data_type": "STRING"},
+        "order_date": {"name": "order_date", "description": "Date the order was placed", "data_type": "DATE"},
+        "status": {"name": "status", "description": "Order status", "data_type": "STRING"},
+        "order_amount": {"name": "order_amount", "description": "Total order amount", "data_type": "NUMERIC"},
+        "paid_amount": {"name": "paid_amount", "description": "Amount successfully paid", "data_type": "NUMERIC"},
+        "order_tier": {"name": "order_tier", "description": "Value tier of the order", "data_type": "STRING"}
+      },
+      "description": "Fact table containing all orders with enriched customer, product, and payment data",
+      "tags": ["marts", "orders", "core"],
+      "config": {"materialized": "incremental"},
+      "fqn": ["fintech", "marts", "fct_orders"],
+      "database": "fintech",
+      "schema": "marts"
+    },
+    "model.fintech.fct_payments": {
+      "unique_id": "model.fintech.fct_payments",
+      "name": "fct_payments",
+      "resource_type": "model",
+      "path": "marts/fct_payments.sql",
+      "original_file_path": "models/marts/fct_payments.sql",
+      "compiled_code": "SELECT\n  ps.order_id,\n  ps.customer_id,\n  ps.payment_attempts,\n  ps.paid_amount,\n  ps.failed_attempts,\n  ps.successful_payment_date,\n  ROUND(SAFE_DIVIDE(1, ps.payment_attempts), 4) AS first_attempt_success_rate,\n  CASE WHEN ps.failed_attempts = 0 THEN TRUE ELSE FALSE END AS no_failures\nFROM `fintech`.`intermediate`.`int_payment_summary` ps",
+      "raw_code": "SELECT\n  ps.order_id,\n  ps.customer_id,\n  ps.payment_attempts,\n  ps.paid_amount,\n  ps.failed_attempts,\n  ps.successful_payment_date,\n  ROUND(SAFE_DIVIDE(1, ps.payment_attempts), 4) AS first_attempt_success_rate,\n  CASE WHEN ps.failed_attempts = 0 THEN TRUE ELSE FALSE END AS no_failures\nFROM {{ ref('int_payment_summary') }} ps",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.int_payment_summary"]
+      },
+      "refs": [{"name": "int_payment_summary"}],
+      "sources": [],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Order identifier", "data_type": "STRING"},
+        "customer_id": {"name": "customer_id", "description": "Customer identifier", "data_type": "STRING"},
+        "payment_attempts": {"name": "payment_attempts", "description": "Number of payment attempts", "data_type": "INTEGER"},
+        "paid_amount": {"name": "paid_amount", "description": "Successfully paid amount", "data_type": "NUMERIC"},
+        "failed_attempts": {"name": "failed_attempts", "description": "Number of failed attempts", "data_type": "INTEGER"},
+        "first_attempt_success_rate": {"name": "first_attempt_success_rate", "description": "Rate of first-attempt success", "data_type": "NUMERIC"}
+      },
+      "description": "Fact table for payment transactions with success/failure metrics",
+      "tags": ["marts", "payments", "core"],
+      "config": {"materialized": "incremental"},
+      "fqn": ["fintech", "marts", "fct_payments"],
+      "database": "fintech",
+      "schema": "marts"
+    },
+    "model.fintech.dim_customers": {
+      "unique_id": "model.fintech.dim_customers",
+      "name": "dim_customers",
+      "resource_type": "model",
+      "path": "marts/dim_customers.sql",
+      "original_file_path": "models/marts/dim_customers.sql",
+      "compiled_code": "SELECT\n  c.customer_id,\n  c.email,\n  c.first_name,\n  c.last_name,\n  c.country,\n  c.signup_date,\n  c.is_active,\n  clv.total_orders,\n  clv.total_revenue,\n  clv.avg_order_value,\n  clv.first_order_date,\n  clv.last_order_date,\n  clv.customer_lifespan_days,\n  CASE\n    WHEN clv.total_revenue >= 10000 THEN 'platinum'\n    WHEN clv.total_revenue >= 1000 THEN 'gold'\n    WHEN clv.total_revenue >= 100 THEN 'silver'\n    ELSE 'bronze'\n  END AS customer_tier\nFROM `fintech`.`staging`.`stg_customers` c\nLEFT JOIN `fintech`.`intermediate`.`int_customer_lifetime_value` clv ON c.customer_id = clv.customer_id",
+      "raw_code": "SELECT\n  c.customer_id,\n  c.email,\n  c.first_name,\n  c.last_name,\n  c.country,\n  c.signup_date,\n  c.is_active,\n  clv.total_orders,\n  clv.total_revenue,\n  clv.avg_order_value,\n  clv.first_order_date,\n  clv.last_order_date,\n  clv.customer_lifespan_days,\n  CASE\n    WHEN clv.total_revenue >= 10000 THEN 'platinum'\n    WHEN clv.total_revenue >= 1000 THEN 'gold'\n    WHEN clv.total_revenue >= 100 THEN 'silver'\n    ELSE 'bronze'\n  END AS customer_tier\nFROM {{ ref('stg_customers') }} c\nLEFT JOIN {{ ref('int_customer_lifetime_value') }} clv ON c.customer_id = clv.customer_id",
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.stg_customers",
+          "model.fintech.int_customer_lifetime_value"
+        ]
+      },
+      "refs": [{"name": "stg_customers"}, {"name": "int_customer_lifetime_value"}],
+      "sources": [],
+      "columns": {
+        "customer_id": {"name": "customer_id", "description": "Unique customer identifier", "data_type": "STRING"},
+        "email": {"name": "email", "description": "Customer email address", "data_type": "STRING"},
+        "first_name": {"name": "first_name", "description": "Customer first name", "data_type": "STRING"},
+        "last_name": {"name": "last_name", "description": "Customer last name", "data_type": "STRING"},
+        "country": {"name": "country", "description": "Customer country", "data_type": "STRING"},
+        "total_revenue": {"name": "total_revenue", "description": "Lifetime revenue from customer", "data_type": "NUMERIC"},
+        "customer_tier": {"name": "customer_tier", "description": "Customer value tier (bronze/silver/gold/platinum)", "data_type": "STRING"}
+      },
+      "description": "Customer dimension table with lifetime value metrics and tier classification",
+      "tags": ["marts", "customers", "dimension"],
+      "config": {"materialized": "table"},
+      "fqn": ["fintech", "marts", "dim_customers"],
+      "database": "fintech",
+      "schema": "marts"
+    },
+    "model.fintech.dim_products": {
+      "unique_id": "model.fintech.dim_products",
+      "name": "dim_products",
+      "resource_type": "model",
+      "path": "marts/dim_products.sql",
+      "original_file_path": "models/marts/dim_products.sql",
+      "compiled_code": "SELECT\n  p.product_id,\n  p.product_name,\n  p.category,\n  p.price,\n  p.currency,\n  p.is_active,\n  COUNT(DISTINCT o.order_id) AS total_orders,\n  SUM(o.amount) AS total_revenue,\n  AVG(o.amount) AS avg_order_value\nFROM `fintech`.`staging`.`stg_products` p\nLEFT JOIN `fintech`.`staging`.`stg_orders` o ON p.product_id = o.product_id\nGROUP BY 1,2,3,4,5,6",
+      "raw_code": "SELECT\n  p.product_id,\n  p.product_name,\n  p.category,\n  p.price,\n  p.currency,\n  p.is_active,\n  COUNT(DISTINCT o.order_id) AS total_orders,\n  SUM(o.amount) AS total_revenue,\n  AVG(o.amount) AS avg_order_value\nFROM {{ ref('stg_products') }} p\nLEFT JOIN {{ ref('stg_orders') }} o ON p.product_id = o.product_id\nGROUP BY 1,2,3,4,5,6",
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.stg_products",
+          "model.fintech.stg_orders"
+        ]
+      },
+      "refs": [{"name": "stg_products"}, {"name": "stg_orders"}],
+      "sources": [],
+      "columns": {
+        "product_id": {"name": "product_id", "description": "Unique product identifier", "data_type": "STRING"},
+        "product_name": {"name": "product_name", "description": "Product name", "data_type": "STRING"},
+        "category": {"name": "category", "description": "Product category", "data_type": "STRING"},
+        "price": {"name": "price", "description": "Product price", "data_type": "NUMERIC"},
+        "total_orders": {"name": "total_orders", "description": "Total orders for this product", "data_type": "INTEGER"},
+        "total_revenue": {"name": "total_revenue", "description": "Total revenue from this product", "data_type": "NUMERIC"}
+      },
+      "description": "Product dimension table with sales performance metrics",
+      "tags": ["marts", "products", "dimension"],
+      "config": {"materialized": "table"},
+      "fqn": ["fintech", "marts", "dim_products"],
+      "database": "fintech",
+      "schema": "marts"
+    },
+    "test.fintech.not_null_stg_orders_order_id": {
+      "unique_id": "test.fintech.not_null_stg_orders_order_id",
+      "name": "not_null_stg_orders_order_id",
+      "resource_type": "test",
+      "path": "not_null_stg_orders_order_id.sql",
+      "original_file_path": "models/staging/stg_orders.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.stg_orders"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "not_null_stg_orders_order_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.unique_stg_orders_order_id": {
+      "unique_id": "test.fintech.unique_stg_orders_order_id",
+      "name": "unique_stg_orders_order_id",
+      "resource_type": "test",
+      "path": "unique_stg_orders_order_id.sql",
+      "original_file_path": "models/staging/stg_orders.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.stg_orders"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "unique_stg_orders_order_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.not_null_stg_customers_customer_id": {
+      "unique_id": "test.fintech.not_null_stg_customers_customer_id",
+      "name": "not_null_stg_customers_customer_id",
+      "resource_type": "test",
+      "path": "not_null_stg_customers_customer_id.sql",
+      "original_file_path": "models/staging/stg_customers.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.stg_customers"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "not_null_stg_customers_customer_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.unique_stg_customers_customer_id": {
+      "unique_id": "test.fintech.unique_stg_customers_customer_id",
+      "name": "unique_stg_customers_customer_id",
+      "resource_type": "test",
+      "path": "unique_stg_customers_customer_id.sql",
+      "original_file_path": "models/staging/stg_customers.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.stg_customers"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "unique_stg_customers_customer_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.not_null_fct_orders_order_id": {
+      "unique_id": "test.fintech.not_null_fct_orders_order_id",
+      "name": "not_null_fct_orders_order_id",
+      "resource_type": "test",
+      "path": "not_null_fct_orders_order_id.sql",
+      "original_file_path": "models/marts/fct_orders.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.fct_orders"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "not_null_fct_orders_order_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.relationships_fct_orders_customer_id": {
+      "unique_id": "test.fintech.relationships_fct_orders_customer_id",
+      "name": "relationships_fct_orders_customer_id",
+      "resource_type": "test",
+      "path": "relationships_fct_orders_customer_id.sql",
+      "original_file_path": "models/marts/fct_orders.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.fct_orders", "model.fintech.dim_customers"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "relationships_fct_orders_customer_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    },
+    "test.fintech.not_null_dim_customers_customer_id": {
+      "unique_id": "test.fintech.not_null_dim_customers_customer_id",
+      "name": "not_null_dim_customers_customer_id",
+      "resource_type": "test",
+      "path": "not_null_dim_customers_customer_id.sql",
+      "original_file_path": "models/marts/dim_customers.yml",
+      "depends_on": {
+        "macros": [],
+        "nodes": ["model.fintech.dim_customers"]
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {},
+      "description": "",
+      "tags": [],
+      "config": {"materialized": "test"},
+      "fqn": ["fintech", "not_null_dim_customers_customer_id"],
+      "database": "fintech",
+      "schema": "dbt_test__audit",
+      "status": "pass"
+    }
+  },
+  "sources": {
+    "source.fintech.fintech.raw_orders": {
+      "unique_id": "source.fintech.fintech.raw_orders",
+      "name": "raw_orders",
+      "resource_type": "source",
+      "path": "models/staging/sources.yml",
+      "original_file_path": "models/staging/sources.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": []
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {
+        "order_id": {"name": "order_id", "description": "Raw order identifier"},
+        "customer_id": {"name": "customer_id", "description": "Raw customer identifier"},
+        "product_id": {"name": "product_id", "description": "Raw product identifier"},
+        "order_date": {"name": "order_date", "description": "Order date"},
+        "status": {"name": "status", "description": "Order status"},
+        "amount": {"name": "amount", "description": "Order amount"}
+      },
+      "description": "Raw orders data from the fintech transactional database",
+      "tags": ["source", "raw"],
+      "config": {"materialized": "source"},
+      "fqn": ["fintech", "fintech", "raw_orders"],
+      "database": "fintech",
+      "schema": "raw"
+    },
+    "source.fintech.fintech.raw_customers": {
+      "unique_id": "source.fintech.fintech.raw_customers",
+      "name": "raw_customers",
+      "resource_type": "source",
+      "path": "models/staging/sources.yml",
+      "original_file_path": "models/staging/sources.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": []
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {
+        "customer_id": {"name": "customer_id", "description": "Raw customer identifier"},
+        "email": {"name": "email", "description": "Customer email"},
+        "first_name": {"name": "first_name", "description": "First name"},
+        "last_name": {"name": "last_name", "description": "Last name"},
+        "country": {"name": "country", "description": "Country code"}
+      },
+      "description": "Raw customer data from the fintech user database",
+      "tags": ["source", "raw"],
+      "config": {"materialized": "source"},
+      "fqn": ["fintech", "fintech", "raw_customers"],
+      "database": "fintech",
+      "schema": "raw"
+    },
+    "source.fintech.fintech.raw_payments": {
+      "unique_id": "source.fintech.fintech.raw_payments",
+      "name": "raw_payments",
+      "resource_type": "source",
+      "path": "models/staging/sources.yml",
+      "original_file_path": "models/staging/sources.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": []
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {
+        "payment_id": {"name": "payment_id", "description": "Payment identifier"},
+        "order_id": {"name": "order_id", "description": "Order identifier"},
+        "payment_status": {"name": "payment_status", "description": "Payment status"},
+        "amount": {"name": "amount", "description": "Payment amount"}
+      },
+      "description": "Raw payment transactions from the payment gateway",
+      "tags": ["source", "raw"],
+      "config": {"materialized": "source"},
+      "fqn": ["fintech", "fintech", "raw_payments"],
+      "database": "fintech",
+      "schema": "raw"
+    },
+    "source.fintech.fintech.raw_products": {
+      "unique_id": "source.fintech.fintech.raw_products",
+      "name": "raw_products",
+      "resource_type": "source",
+      "path": "models/staging/sources.yml",
+      "original_file_path": "models/staging/sources.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": []
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {
+        "product_id": {"name": "product_id", "description": "Product identifier"},
+        "product_name": {"name": "product_name", "description": "Product name"},
+        "category": {"name": "category", "description": "Product category"},
+        "price": {"name": "price", "description": "Product price"}
+      },
+      "description": "Raw product catalog from the product management system",
+      "tags": ["source", "raw"],
+      "config": {"materialized": "source"},
+      "fqn": ["fintech", "fintech", "raw_products"],
+      "database": "fintech",
+      "schema": "raw"
+    },
+    "source.fintech.fintech.raw_events": {
+      "unique_id": "source.fintech.fintech.raw_events",
+      "name": "raw_events",
+      "resource_type": "source",
+      "path": "models/staging/sources.yml",
+      "original_file_path": "models/staging/sources.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": []
+      },
+      "refs": [],
+      "sources": [],
+      "columns": {
+        "event_id": {"name": "event_id", "description": "Event identifier"},
+        "customer_id": {"name": "customer_id", "description": "Customer identifier"},
+        "event_type": {"name": "event_type", "description": "Type of event"},
+        "event_date": {"name": "event_date", "description": "Event timestamp"}
+      },
+      "description": "Raw user behavior events from the analytics tracking system",
+      "tags": ["source", "raw"],
+      "config": {"materialized": "source"},
+      "fqn": ["fintech", "fintech", "raw_events"],
+      "database": "fintech",
+      "schema": "raw"
+    }
+  },
+  "exposures": {
+    "exposure.fintech.revenue_dashboard": {
+      "unique_id": "exposure.fintech.revenue_dashboard",
+      "name": "revenue_dashboard",
+      "resource_type": "exposure",
+      "path": "exposures/revenue_dashboard.yml",
+      "original_file_path": "models/exposures/revenue_dashboard.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.fct_orders",
+          "model.fintech.fct_payments"
+        ]
+      },
+      "refs": [{"name": "fct_orders"}, {"name": "fct_payments"}],
+      "sources": [],
+      "columns": {},
+      "description": "Revenue and payments dashboard used by the Finance team in Looker",
+      "tags": ["exposure", "finance"],
+      "config": {"materialized": "exposure"},
+      "fqn": ["fintech", "revenue_dashboard"],
+      "database": null,
+      "schema": null
+    },
+    "exposure.fintech.customer_dashboard": {
+      "unique_id": "exposure.fintech.customer_dashboard",
+      "name": "customer_dashboard",
+      "resource_type": "exposure",
+      "path": "exposures/customer_dashboard.yml",
+      "original_file_path": "models/exposures/customer_dashboard.yml",
+      "compiled_code": null,
+      "raw_code": null,
+      "depends_on": {
+        "macros": [],
+        "nodes": [
+          "model.fintech.dim_customers",
+          "model.fintech.fct_orders"
+        ]
+      },
+      "refs": [{"name": "dim_customers"}, {"name": "fct_orders"}],
+      "sources": [],
+      "columns": {},
+      "description": "Customer analytics dashboard for the Growth and CRM teams in Looker",
+      "tags": ["exposure", "growth"],
+      "config": {"materialized": "exposure"},
+      "fqn": ["fintech", "customer_dashboard"],
+      "database": null,
+      "schema": null
+    }
+  },
+  "metrics": {}
+}
