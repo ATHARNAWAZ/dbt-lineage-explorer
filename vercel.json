@@ -31,6 +31,6 @@
     }
   ],
   "env": {
-    "ALLOWED_ORIGINS": "@allowed_origins"
+    "ALLOWED_ORIGINS": "*"
   }
 }
