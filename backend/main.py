@@ -1,5 +1,11 @@
-import os
 import sys
+import os
+
+# Ensure backend/ is on the path regardless of how Vercel sets cwd
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 import traceback
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -9,9 +15,6 @@ load_dotenv()
 
 app = FastAPI(title="dbt Lineage Explorer API", version="1.0.0")
 
-_startup_error: str | None = None
-
-# CORS
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 allowed_origins = [o.strip() for o in allowed_origins]
 use_credentials = "*" not in allowed_origins
@@ -24,7 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load routes — catch import errors so we can report them via /debug
+_startup_error: str | None = None
+
 try:
     from api.routes import manifest, graph, models, lineage, impact, health
     app.include_router(health.router)
@@ -43,5 +47,7 @@ def debug_info():
         "startup_error": _startup_error,
         "sys_path": sys.path,
         "cwd": os.getcwd(),
+        "backend_dir": _backend_dir,
         "python": sys.version,
+        "files": os.listdir(_backend_dir) if os.path.exists(_backend_dir) else [],
     }
