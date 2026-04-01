@@ -1,8 +1,6 @@
 import type { GraphData, GraphNode } from '../types/graph'
 import type { LineageResult, ImpactResult } from '../types/lineage'
 
-// Use relative paths so Vite proxy handles routing to the backend.
-// Vite proxy: /api -> http://localhost:8000
 const BASE = '/api'
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -35,19 +33,27 @@ export const apiService = {
     return handleResponse<GraphData>(res)
   },
 
-  async getModel(modelId: string): Promise<GraphNode> {
-    const res = await fetch(`${BASE}/models/${encodeURIComponent(modelId)}`)
-    return handleResponse<GraphNode>(res)
+  // Model lookup is now client-side — kept for compatibility
+  async getModel(_modelId: string): Promise<GraphNode> {
+    throw new Error('Use local graphData instead')
   },
 
-  async getLineage(modelId: string): Promise<LineageResult> {
-    const res = await fetch(`${BASE}/lineage/${encodeURIComponent(modelId)}`)
+  // Stateless: sends full graphData in body so Vercel serverless works
+  async getLineage(modelId: string, graphData: GraphData): Promise<LineageResult> {
+    const res = await fetch(`${BASE}/lineage/${encodeURIComponent(modelId)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(graphData),
+    })
     return handleResponse<LineageResult>(res)
   },
 
-  async getImpactAnalysis(modelId: string): Promise<ImpactResult> {
+  // Stateless: sends full graphData in body so Vercel serverless works
+  async getImpactAnalysis(modelId: string, graphData: GraphData): Promise<ImpactResult> {
     const res = await fetch(`${BASE}/impact/${encodeURIComponent(modelId)}`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(graphData),
     })
     return handleResponse<ImpactResult>(res)
   },

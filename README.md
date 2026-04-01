@@ -1,138 +1,139 @@
-# dbt-lineage-explorer
+# dbt Lineage Explorer
 
-> Understand your dbt project in minutes, not weeks.
+> Visualize, explore and understand your entire dbt project — locally or in the cloud.
 
-An interactive DAG explorer for dbt projects. Upload your `manifest.json` and get a visual, clickable lineage graph with model details, column info, test results, and AI-powered impact analysis.
-
-Built because onboarding to a new dbt project shouldn't take 3 weeks of reading YAML files.
-
----
-
-## The Problem
-
-You join a new data team. There's a dbt project with 80 models.
-Nobody documented anything properly.
-You spend days just figuring out what depends on what.
-
-This fixes that.
+**Live Demo → [dbt-lineage-explorer.vercel.app](https://dbt-lineage-explorer.vercel.app)**  
+**GitHub → [github.com/ATHARNAWAZ/dbt-lineage-explorer](https://github.com/ATHARNAWAZ/dbt-lineage-explorer)**
 
 ---
 
-## What It Does
+## What it does
 
-- Upload your dbt `manifest.json` → instant interactive DAG
-- Click any model → see its SQL, columns, tests, and upstream/downstream deps
-- Search and filter by layer (staging, intermediate, marts, sources)
-- Ask the AI — "what breaks if I change the orders model?" → get a real answer
-- Column-level lineage — trace a single field through the entire pipeline
+Upload your `manifest.json` and instantly get an interactive graph of your entire dbt pipeline.
+
+- **Interactive DAG** — zoom, pan, click any model to inspect it
+- **SQL Viewer** — Monaco editor with full syntax highlighting
+- **Column Lineage** — trace any column back to its raw source
+- **AI Impact Analysis** — Claude explains what breaks downstream before you ship
+- **Tests & Docs** — see test results and schema.yml docs side-by-side
+- **Works locally** — no data leaves your machine (except AI calls if enabled)
 
 ---
 
-## Quick Start
+## Architecture
+
+```
+manifest.json → FastAPI → NetworkX → React Flow DAG
+                    ↓
+              Claude API (optional)
+                    ↓
+            Impact Analysis Report
+```
+
+| Layer | Tech |
+|-------|------|
+| Backend | Python 3.11, FastAPI, NetworkX, Pydantic |
+| Frontend | React 18, TypeScript, React Flow, Monaco Editor |
+| AI | Anthropic Claude (optional) |
+| Deploy | Vercel (serverless, stateless) |
+
+---
+
+## Quick Start (5 commands)
 
 ```bash
 git clone https://github.com/ATHARNAWAZ/dbt-lineage-explorer
-cd dbt-lineage-explorer
-docker-compose up
+cd dbt-lineage-explorer/backend
+python -m venv venv && .\venv\Scripts\activate
+pip install -r requirements.txt
+python -m uvicorn main:app --reload
 ```
 
-Open http://localhost:3000 — upload your manifest.json and you're in.
+Then in a second terminal:
+```bash
+cd dbt-lineage-explorer/frontend
+npm install && npm run dev
+```
 
-Don't have a manifest.json handy? There's a sample one in `/sample_data/` based on a fintech pipeline.
-
----
-
-## Stack
-
-**Backend:** Python · FastAPI · NetworkX · PyIceberg · Anthropic Claude API
-**Frontend:** React 18 · TypeScript · React Flow (@xyflow/react) · Monaco Editor · Tailwind · Zustand
-**Infra:** Docker · GitHub Actions
+Open **http://localhost:5173** — click **"Load sample project"** to explore immediately. No setup required.
 
 ---
 
-## How To Generate Your manifest.json
+## Configuration
 
 ```bash
-# in your dbt project
-dbt compile
-
-# manifest.json will be at
-./target/manifest.json
+cp backend/.env.example backend/.env
+# Edit backend/.env and add your key:
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Upload that file to the explorer and you're done.
+AI impact analysis works without a key — it shows graph-based results only. Add the key for Claude's plain-English explanation.
 
 ---
 
-## Features
+## Vercel Deployment
 
-| Feature | Status |
-|---|---|
-| Interactive DAG with zoom/pan | ✅ |
-| Node colours by layer (staging/int/marts/source) | ✅ |
-| Click model → SQL + columns + tests | ✅ |
-| Search and filter sidebar | ✅ |
-| AI impact analysis (Claude API) | ✅ |
-| Column-level lineage | ✅ |
-| Sample fintech manifest included | ✅ |
-| Dark mode | ✅ |
+Deployed at **[dbt-lineage-explorer.vercel.app](https://dbt-lineage-explorer.vercel.app)**
 
----
+The backend runs as Python serverless functions (stateless). All graph operations — lineage, impact scope, model lookup — send graph context per-request, so no in-memory state is needed.
 
-## Environment Variables
-
-```env
-ANTHROPIC_API_KEY=your_key_here
+To deploy your own fork:
+```bash
+npx vercel --prod
 ```
 
-That's it. No other config needed for local development.
+Add `ANTHROPIC_API_KEY` in Vercel → Project Settings → Environment Variables.
 
 ---
 
-## Sample Data
+## Project Structure
 
-The repo includes a sample `manifest.json` for a fictional fintech pipeline:
-
-- 5 source tables (transactions, customers, products, events, sessions)
-- 5 staging models
-- 3 intermediate models
-- 4 mart models
-- 2 exposures
-
-Good for testing the explorer without connecting your own project.
-
----
-
-## Known Issues
-
-- Large manifests (500+ models) can be slow to render on first load
-- Column-level lineage only works if your dbt models have column descriptions in schema.yml
-- AI analysis requires an Anthropic API key
-
----
-
-## Roadmap
-
-- [ ] dbt Cloud integration (pull manifest automatically)
-- [ ] Export lineage as PNG/SVG
-- [ ] Slack notifications when model structure changes
-- [ ] Multi-project support
+```
+dbt-lineage-explorer/
+├── backend/                       # FastAPI + NetworkX
+│   ├── api/
+│   │   ├── routes/                # manifest, graph, lineage, impact
+│   │   └── models/                # Pydantic schemas
+│   ├── services/
+│   │   ├── manifest_parser.py     # dbt manifest → GraphData
+│   │   ├── graph_service.py       # NetworkX traversal
+│   │   ├── lineage_service.py     # Column lineage extraction
+│   │   └── claude_service.py      # Claude AI integration
+│   └── data/sample_manifest.json  # Fintech demo pipeline
+└── frontend/                      # React + TypeScript
+    └── src/
+        ├── components/
+        │   ├── graph/             # React Flow DAG + custom nodes
+        │   ├── detail/            # SQL, Columns, Tests, Impact panels
+        │   └── sidebar/           # Search, filters, stats
+        ├── pages/                 # Upload, Explorer
+        └── store/                 # Zustand state
+```
 
 ---
 
-## Why I Built This
+## Node Colors
 
-I was onboarding to a new data project and spent an entire week just drawing lineage diagrams on paper. There had to be a better way.
+| Layer | Color | Naming |
+|-------|-------|--------|
+| Source | Grey `#718096` | raw_ tables |
+| Staging | Blue `#4299e1` | stg_ |
+| Intermediate | Purple `#9f7aea` | int_ |
+| Marts | Green `#48bb78` | fct_ / dim_ |
+| Exposure | Orange `#ed8936` | dashboards |
 
-There are commercial tools that do this. They cost $30k/year.
-This is free and runs locally in one command.
+---
+
+## Tests
+
+```bash
+cd backend
+.\venv\Scripts\activate
+pytest tests/ -v   # 14 tests, all pass
+```
 
 ---
 
 ## License
 
-MIT — do whatever you want with it.
-
----
-
-Built by [ATHARNAWAZ](https://github.com/ATHARNAWAZ) · [LinkedIn](https://linkedin.com/in/atharnawaz)
+MIT

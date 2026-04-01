@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Zap, Copy, Check, AlertTriangle } from 'lucide-react'
 import { apiService } from '../../services/apiService'
+import { useExplorerStore } from '../../store/explorerStore'
 import type { ImpactResult } from '../../types/lineage'
 
 interface ImpactAnalysisProps {
@@ -70,12 +71,14 @@ export function ImpactAnalysis({ modelId, modelName }: ImpactAnalysisProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const graphData = useExplorerStore(s => s.graphData)
 
   const handleAnalyze = async () => {
+    if (!graphData) { setError('No graph data loaded'); return }
     setLoading(true)
     setError(null)
     try {
-      const data = await apiService.getImpactAnalysis(modelId)
+      const data = await apiService.getImpactAnalysis(modelId, graphData)
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed')

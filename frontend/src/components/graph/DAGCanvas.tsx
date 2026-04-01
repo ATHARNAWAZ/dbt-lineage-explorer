@@ -16,7 +16,7 @@ import { ModelNode } from './ModelNode'
 import { SourceNode } from './SourceNode'
 import { useExplorerStore } from '../../store/explorerStore'
 import type { GraphData } from '../../types/graph'
-import { apiService } from '../../services/apiService'
+
 
 const nodeTypes = {
   modelNode: ModelNode,
@@ -154,19 +154,12 @@ export function DAGCanvas({ graphData }: { graphData: GraphData }) {
     setEdges(layoutedEdges)
   }, [graphData, selectedModelId, ancestorSet, descendantSet, setNodes, setEdges])
 
-  const onNodeClick = useCallback(async (_: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     const modelId = node.id
     setSelectedModelId(modelId)
     setDetailPanelOpen(true)
-
-    try {
-      const model = await apiService.getModel(modelId)
-      setSelectedModel(model)
-    } catch {
-      // Use from graphData as fallback
-      const fallback = graphData.nodes.find(n => n.id === modelId)
-      if (fallback) setSelectedModel(fallback)
-    }
+    const model = graphData.nodes.find(n => n.id === modelId)
+    if (model) setSelectedModel(model)
   }, [graphData, setSelectedModelId, setDetailPanelOpen, setSelectedModel])
 
   const onPaneClick = useCallback(() => {
