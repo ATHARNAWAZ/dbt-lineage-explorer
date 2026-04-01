@@ -1,17 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 from services.graph_service import build_networkx_graph, get_ancestors, get_descendants
 from services.lineage_service import extract_column_lineage
 from api.models.graph import GraphData
 from api.models.response import LineageResult
 
 router = APIRouter()
-
-
-class LineageRequest(BaseModel):
-    graph_data: GraphData
-    nodes: list = Field(default_factory=list)
-    edges: list = Field(default_factory=list)
 
 
 @router.post("/lineage/{model_id:path}", response_model=LineageResult)

@@ -9,11 +9,15 @@ load_dotenv()
 app = FastAPI(title="dbt Lineage Explorer API", version="1.0.0")
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+allowed_origins = [o.strip() for o in allowed_origins]
+
+# allow_credentials=True is incompatible with wildcard origins (CORS spec)
+use_credentials = "*" not in allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_credentials=use_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
